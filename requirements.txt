@@ -1,4 +1,4 @@
 # requirements.txt
 pip install highrise-bot-sdk
-pip install flask
+
 git+https://github.com/aliabyo/BaseBotRepo.git
