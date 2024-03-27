@@ -13,7 +13,6 @@ from highrise.models import SessionMetadata
 import re
 from highrise.models import SessionMetadata,  GetMessagesRequest, User ,Item, Position, CurrencyItem, Reaction
 from typing import Any, Dict, Union
-from webserver import keep_alive
 
 dance_group = set()
 moderators = ['Alionardo_','Sampire_',"1_on_1:62b272df4de9bb2d9d04d01c:65fa951fc153ecea0f38e1e2","1_on_1:658028e11664da0f08fc35b7:65fa951fc153ecea0f38e1e2"]
