@@ -1,0 +1,3 @@
+# requirements.txt
+
+git+https://github.com/aliabyo/BaseBotRepo.git
