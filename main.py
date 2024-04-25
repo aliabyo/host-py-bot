@@ -47,7 +47,7 @@ class Bot(BaseBot):
         self.following_username = None
         self.maze_players = {}
         self.user_points = {}  # Dictionary to store user points
-        self.emotesdf = Dance_Floor
+        self.Emotes = Emotes
       
 
     def load_temporary_vips(self):
