@@ -13,7 +13,7 @@ from highrise.models import SessionMetadata
 import re
 from highrise.models import SessionMetadata,  GetMessagesRequest, User ,Item, Position, CurrencyItem, Reaction
 from typing import Any, Dict, Union
-
+from emotes import Emotes
 dance_group = set()
 moderators = ['Alionardo_','Sampire_',"1_on_1:62b272df4de9bb2d9d04d01c:65fa951fc153ecea0f38e1e2","1_on_1:658028e11664da0f08fc35b7:65fa951fc153ecea0f38e1e2"]
 
@@ -34,78 +34,7 @@ class Counter:
 class Bot(BaseBot):
     continuous_emote_tasks: Dict[int, asyncio.Task[Any]] = {}  
     user_data: Dict[int, Dict[str, Any]] = {}
-    EMOTE_DICT = {
-      "1"         :"dance-pinguin",
-      "2"       : "idle-guitar",
-      "3"     : "dance-anime",
-      "4"           : "emoji-angry",
-      "5"             : "emote-bow",
-      "6"          : "idle-dance-casual",
-      "7"        : "emote-charging",
-      "8"       : "emote-confused",
-      "9"         : "emoji-cursing",
-      "10"          : "emote-curtsy",
-      "11"           : "emote-cutey",
-      "12"            : "dance-tiktok2",
-      "13"       : "emote-cute",
-      "14"      : "emote-energyball",
-      "15"        : "idle-enthusiastic",
-      "16"     : "emote-fashionista",
-      "17"            : "emoji-flex",
-      "18"      : "emote-lust",
-      "19"           : "emote-float",
-      "20"            : "emote-frog",
-      "21"      : "dance-weird",
-      "22"         : "emote-gravity",
-      "23"          : "emote-greedy",
-      "24"           : "emote-hello",
-      "25"             : "emote-hot",
-      "26"        : "dance-icecream",
-      "27"            : "emote-kiss",
-      "28"            : "dance-blackpink",
-      "29"           : "emote-superpose",
-      "30"           : "emote-laughing",
-      "31"          : "dance-shoppingcart",
-      "32"          : "emote-maniac",
-      "33"           : "emote-model",
-      "34"              : "emote-no",
-      "35"         : "dance-macarena",
-      "36"      : "dance-pennywise",      
-      "37"           : "emote-pose1",
-      "38"           : "emote-pose3",
-      "39"           : "emote-pose5",
-      "40"           : "emote-pose7",
-      "41"           : "emote-pose8",
-      "42"      : "emote-punkguitar",
-      "43"    : "emoji-celebrate",
-      "44"         : "dance-russian",
-      "45"             : "emote-sad",
-      "46"          : "dance-tiktok8",
-      "47"         : "dance-tiktok10",
-      "48"             : "emote-shy",
-      "45"       : "idle_singing",
-      "46"             : "idle-loop-sitfloor",
-      "47"       : "emote-snowangel",
-      "48"        : "emote-snowball",
-      "49"      : "emote-swordfight",
-      "50"     : "emote-telekinesis",
-      "51"        : "emote-teleporting",
-      "52"        : "emoji-thumbsup",
-      "53"           : "emote-tired",
-      "54"       : "emoji-gagging",
-      "55"           : "dance-tiktok9",
-      "56"            : "emote-wave",
-      "57"           : "dance-weird",
-      "58"            : "emote-snake",
-      "59"          : "dance-wrong",
-      "60"             : "emote-yes",
-      "61"       : "emote-zombierun",
-      "62"           : "emoji-angry",
-      "63"             : "emote-bow",
-
-    }
     continuous_emote_task = None
-    dances = ["dance-blackpink","dance-russian" ,"dance-shoppingcart" ,"dance-tiktok9","dance-tiktok9","idle-dance-casual","dance-tiktok10","dance-pinguin", "airguitar","dance-anime"]
     cooldowns = {}  # Class-level variable to store cooldown timestamps
     emote_looping = False
 
@@ -118,7 +47,7 @@ class Bot(BaseBot):
         self.following_username = None
         self.maze_players = {}
         self.user_points = {}  # Dictionary to store user points
-      
+        self.emotesdf = Dance_Floor
       
 
     def load_temporary_vips(self):
@@ -179,7 +108,7 @@ class Bot(BaseBot):
      except Exception as e:
             print(f"An error on user_on_join: {e}") 
 
-    async def on_user_leave(self, user: User) ->None:
+    async def on_user_join(self, user: User, position: Position | AnchorPosition) -> None:
       try:
         print(f"{user.username} has left the room")
         await self.highrise.chat(f"  {user.username} left the room")
@@ -188,19 +117,13 @@ class Bot(BaseBot):
       except Exception as e:
          print(f"An error on user_on_join: {e}") 
       
-    async def emote_duration(self, emote_id, delay=None):
-      """
-      Calculate the duration of an emote in seconds.
-
-      Parameters:
-      emote_id (int): The ID of the emote.
-
-      Returns:
-      float: The duration of the emote in seconds.
-      """
-      emote_info = await self.highrise.get_emote_info(emote_id)
-      return emote_info.duration
-
+    
+    async def get_emote_E(self, target) -> None: 
+      try:
+         emote_info = self.Emotes.get(target)
+         return emote_info
+      except ValueError:
+        pass
     async def teleport_user_next_to(self, target_username: str, requester_user: User):
       room_users = await self.highrise.get_room_users()
       requester_position = None
@@ -222,9 +145,23 @@ class Bot(BaseBot):
 
 
 
-
+   async def stop_continuous_emote(self, user_id: int):
+      if user_id in self.continuous_emote_tasks and not self.continuous_emote_tasks[user_id].cancelled():
+          task = self.continuous_emote_tasks[user_id]
+          task.cancel()
+          with contextlib.suppress(asyncio.CancelledError):
+              await task
+          del self.continuous_emote_tasks[user_id]
    
-
+    async def send_continuous_emote(self, emote_text ,user_id,emote_time):
+            try:
+                while True:                    
+                      tasks = [asyncio.create_task(self.highrise.send_emote(emote_text, user_id))]
+                      await asyncio.wait(tasks)
+                      await asyncio.sleep(emote_time)
+                      await asyncio.sleep(1)
+            except Exception as e:
+                      print(f"{e}")
     async def run(self, room_id, token):
         definitions = [BotDefinition(self, room_id, token)]
         await __main__.main(definitions) 
@@ -294,6 +231,40 @@ class Bot(BaseBot):
              roomUsers = (await self.highrise.get_room_users()).content
              for roomUser, _ in roomUsers:
                 await self.highrise.react("heart", roomUser.id)
+         if message.lower().startswith("loop"):
+                parts = message.split()
+                E = parts[1]
+                E = int(E)
+                emote_text, emote_time = await self.get_emote_E(E)
+                emote_time -= 1
+                user_id = user.id  
+                if user.id in self.continuous_emote_tasks and not self.continuous_emote_tasks[user.id].cancelled():
+                   await self.stop_continuous_emote(user.id)
+                   task = asyncio.create_task(self.send_continuous_emote(emote_text,user_id,emote_time))
+                   self.continuous_emote_tasks[user.id] = task
+                else:
+                   task = asyncio.create_task(self.send_continuous_emote(emote_text,user_id,emote_time))
+                   self.continuous_emote_tasks[user.id] = task  
+
+         elif message.lower().startswith("stop"):
+           if user.id in self.continuous_emote_tasks and not self.continuous_emote_tasks[user.id].cancelled():
+               await self.stop_continuous_emote(user.id)
+               await self.highrise.chat("Continuous emote has been stopped.")
+           else:
+               await self.highrise.chat("You don't have an active loop_emote.")
+         elif message.lower().startswith("users"):
+           room_users = (await self.highrise.get_room_users()).content
+           await self.highrise.chat(f"There are {len(room_users)} users in the room")
+           
+         if  message.isdigit() and 1 <= int(message) <= 91:
+             parts = message.split()
+             E = parts[0]
+             E = int(E)
+             emote_text, emote_time = await self.get_emote_E(E)    
+             tasks = [asyncio.create_task(self.highrise.send_emote(emote_text, user.id))]
+             await asyncio.wait(tasks)
+
+           
          if message.startswith("!kick"):
             if user.username.lower() in self.moderators:
                 parts = message.split()
