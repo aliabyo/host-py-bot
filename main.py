@@ -189,7 +189,7 @@ class Bot(BaseBot):
 
 
 
-   async def stop_continuous_emote(self, user_id: int):
+    async def stop_continuous_emote(self, user_id: int):
       if user_id in self.continuous_emote_tasks and not self.continuous_emote_tasks[user_id].cancelled():
           task = self.continuous_emote_tasks[user_id]
           task.cancel()
