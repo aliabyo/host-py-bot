@@ -560,30 +560,8 @@ class Bot(BaseBot):
             await self.highrise.chat(f"{xox}")
 
 
-         if message.lower().startswith("loop"):
-           emote_name = message[5:].strip()
-           if emote_name in self.EMOTE_DICT:
-               emote_id = self.EMOTE_DICT[emote_name]
-               delay = await self.emote_duration(emote_id)
-               if " " in emote_name:
-                   emote_name, delay_str = emote_name.split(" ")
-                   if delay_str.isdigit():
-                       delay = float(delay_str)
-
-               if user.id in self.continuous_emote_tasks and not self.continuous_emote_tasks[user.id].cancelled():
-                   await self.stop_continuous_emote(user.id)
-
-               task = asyncio.create_task(self.send_continuous_emote(emote_id, user.id,delay))
-               self.continuous_emote_tasks[user.id] = task  
-
-         elif message.lower().startswith("stop"):
-           if user.id in self.continuous_emote_tasks and not self.continuous_emote_tasks[user.id].cancelled():
-               await self.stop_continuous_emote(user.id)
-
-               await self.highrise.chat("Continuous emote has been stopped.")
-           else:
-               await self.highrise.chat("You don't have an active loop_emote.")
-         elif message.lower().startswith("users"):
+   
+         if message.lower().startswith("users"):
            room_users = (await self.highrise.get_room_users()).content
            await self.highrise.chat(f"There are {len(room_users)} users in the room")
          if message.startswith("0"):
