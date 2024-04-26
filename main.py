@@ -99,7 +99,7 @@ class Bot(BaseBot):
     async def on_emote(self, user: User ,emote_id : str , receiver: User | None )-> None:
       print (f"{user.username} , {emote_id}")
 
-    async def on_user_join(self, user: User ) -> None:
+    async def on_user_join(self, user: User, position: Position | AnchorPosition) -> None:
      
      try:
 
@@ -152,7 +152,7 @@ class Bot(BaseBot):
 
       #Send the info to the chat
       await self.highrise.chat(f"""\nUser: {username}\nNumber of followers: {number_of_followers}\nNumber of friends: {number_of_friends}\nNumber of following: {number_of_folowing}\nJoined at: {joined_at}\nLast login: {last_login}\nNumber of posts: {number_of_posts}\nMost likes in a post: {most_likes_post}""")
-    async def on_user_join(self, user: User, position: Position | AnchorPosition) -> None:
+    async def on_user_leave(self, user: User, position: Position | AnchorPosition) -> None:
       try:
         print(f"{user.username} has left the room")
         await self.highrise.chat(f"  {user.username} left the room")
